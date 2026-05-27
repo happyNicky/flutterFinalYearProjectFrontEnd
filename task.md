@@ -1,0 +1,21 @@
+- [x] Add personalized recommendation endpoint in backend
+  - [x] Extend NewsService with user‑based query
+  - [x] Update NewsController (`/api/news/personalized` / `/api/news/recommended`)
+  - [x] Add repository method to fetch user bookmark categories (if needed)
+- [x] Add sharing support in Flutter UI
+  - [x] Add `share_plus` dependency
+  - [x] Add share button on article cards (list, details, bookmarks, search/explore)
+- [x] Implement theme switching
+  - [x] Add `shared_preferences` dependency
+  - [x] Create ThemeProvider (Riverpod) with persisted ThemeMode
+  - [x] Add Settings screen UI with toggle
+  - [x] Apply theme across app (MaterialApp `themeMode`)
+- [x] Implement real‑time notifications
+  - [x] Add SSE (Server‑Sent Events) endpoint in backend (`/api/notifications/stream`)
+  - [x] Create NotificationService to manage emitters and broadcast messages
+  - [x] Trigger a test notification after fetching news (automatic fixed-rate mock broadcasting)
+  - [x] Add SSE stream listener to Flutter
+  - [x] Create NotificationProvider listening to SSE and showing premium slide-down in-app notification banners
+- [x] Update pubspec.yaml with new dependencies
+- [x] Verify backend builds and runs successfully
+
