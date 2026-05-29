@@ -45,77 +45,11 @@ class ProfileScreen extends ConsumerWidget {
                 style: TextStyle(color: colorScheme.primary, fontSize: 36, fontWeight: FontWeight.bold),
               ),
             ),
-            const SizedBox(height: 16),
-            Text(authState.name ?? context.tr('guest', ref: ref), style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-            Text(authState.email ?? 'guest@newsapp.com', style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6), fontWeight: FontWeight.w500)),
-            const SizedBox(height: 32),
-            _buildProfileStatRow(context, ref, bookmarksCount),
-            const SizedBox(height: 32),
-            _buildMenuItem(
-              context,
-              LucideIcons.bell,
-              context.tr('notifications', ref: ref),
-              onTap: () => context.push('/notifications'),
-            ),
-            _buildMenuItem(context, LucideIcons.helpCircle, context.tr('help_support', ref: ref), onTap: () => context.push('/help-support')),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.withOpacity(0.1),
-                foregroundColor: Colors.red,
-                elevation: 0,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              onPressed: () async {
-                await ref.read(authProvider.notifier).logout();
-                if (context.mounted) {
-                  context.go('/login');
-                }
-              },
-              icon: const Icon(LucideIcons.logOut),
-              label: Text(context.tr('logout', ref: ref), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ),
-            const SizedBox(height: 100), // padding for bottom nav
+            // padding for bottom nav
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileStatRow(BuildContext context, WidgetRef ref, String bookmarksCount) {
-    final readCount = ref.watch(readArticlesProvider).length.toString();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildStat(context, readCount, context.tr('read_last_week', ref: ref)),
-        Container(width: 1, height: 40, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
-        _buildStat(context, bookmarksCount, context.tr('saved_articles', ref: ref)),
-      ],
-    );
-  }
-
-  Widget _buildStat(BuildContext context, String value, String label) {
-    return Column(
-      children: [
-        Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-        Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
-      ],
-    );
-  }
-
-  Widget _buildMenuItem(BuildContext context, IconData icon, String title, {VoidCallback? onTap}) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(color: colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
-        child: Icon(icon, color: colorScheme.onSurface),
-      ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      trailing: Icon(LucideIcons.chevronRight, color: colorScheme.onSurface.withOpacity(0.5)),
-      onTap: onTap,
-    );
-  }
 }
