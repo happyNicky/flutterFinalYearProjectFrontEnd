@@ -37,13 +37,12 @@ class CategoryArticlesScreen extends ConsumerWidget {
 
     final isCategory = category != null;
     
-    // Watch languageProvider so the screen invalidates on language changes
+   
     final lang = ref.watch(languageProvider);
     
     final translatedCategory = category != null ? _translateCategoryName(category!, ref) : null;
     final title = isCategory ? translatedCategory! : '${context.tr('search', ref: ref)}: "$query"';
-    
-    // Select the correct provider
+ 
     final newsAsync = isCategory
         ? ref.watch(categoryNewsProvider(category!))
         : ref.watch(searchNewsProvider(query!));
@@ -85,7 +84,7 @@ class CategoryArticlesScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final article = articles[index];
               
-              // Watch bookmarks state
+          
               ref.watch(bookmarksProvider);
               final isSaved = ref.read(bookmarksProvider.notifier).isBookmarked(article.id);
 

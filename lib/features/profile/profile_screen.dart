@@ -101,7 +101,7 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 100), 
-            // padding for bottom nav
+            
           ],
         ),
       ),

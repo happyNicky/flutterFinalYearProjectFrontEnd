@@ -175,7 +175,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
                 ],
               ),
               
-              // Trending Header
+             
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
@@ -315,7 +315,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
                   ),
                 ),
 
-              // Recommended Header
+              
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
@@ -329,7 +329,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
                 ),
               ),
 
-              // Recommended News List
+             
               if (recommendedFeed.articles.isEmpty && recommendedFeed.isLoading)
                 const SliverToBoxAdapter(
                   child: Center(

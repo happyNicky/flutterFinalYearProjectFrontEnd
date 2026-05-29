@@ -312,7 +312,7 @@ class NotificationHistoryNotifier
           .where((n) => !n.isSystemMessage)
           .toList();
     } catch (_) {
-      // Ignore invalid payload and keep current state.
+      
     }
   }
 

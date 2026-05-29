@@ -35,7 +35,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
 
     _controller.forward();
 
-    // Check if we can navigate once the animation finishes
+    
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         _checkAndNavigate();
@@ -65,10 +65,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    // Watch authState so the provider is created and we receive updates when auto-login completes
+    
     ref.watch(authProvider);
 
-    // Listen to changes in authState: if it becomes initialized and the animation is done, navigate
+    
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next.isInitialized && _controller.isCompleted) {
         _checkAndNavigate();

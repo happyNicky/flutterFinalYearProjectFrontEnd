@@ -32,7 +32,6 @@ class ArticleDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Mark article as read after frame is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(readArticlesProvider.notifier).markAsRead(article.id);
       ref.read(notificationHistoryProvider.notifier).clearForArticle(article.id);
@@ -252,7 +251,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                         label: Text('Read Full Article on Web', style: const TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
-                  const SizedBox(height: 48), // Padding at the bottom
+                  const SizedBox(height: 48), 
                 ],
               ),
             ),

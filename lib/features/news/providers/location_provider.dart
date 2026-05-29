@@ -120,7 +120,7 @@ class LocationNotifier extends StateNotifier<LocationState> {
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 5), // Prevent hanging indefinitely
+          timeLimit: Duration(seconds: 5), 
         ),
       );
       

@@ -7,7 +7,7 @@ class TranslationService {
   factory TranslationService() => _instance;
   TranslationService._internal();
 
-  // In-memory cache for translated articles to optimize performance and prevent rate limiting
+
   final Map<String, Article> _translationCache = {};
 
   void clearCache() {
@@ -33,7 +33,7 @@ class TranslationService {
       }
       return text;
     } catch (_) {
-      // Return original text if anything fails (offline, timeout, etc.)
+      
       return text;
     }
   }
@@ -55,7 +55,6 @@ class TranslationService {
     }
 
     try {
-      // Translate title, content and category
       final translatedTitle = await translateText(article.title);
       final translatedContent = await translateText(article.content);
       final translatedCategory = _translateCategory(article.category);
@@ -79,7 +78,6 @@ class TranslationService {
   }
 
   Future<List<Article>> translateArticles(List<Article> articles) async {
-    // To maintain speed, we translate the items concurrently
     return Future.wait(articles.map((article) => translateArticle(article)));
   }
 

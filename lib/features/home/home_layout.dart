@@ -44,7 +44,7 @@ class _HomeLayoutState extends ConsumerState<HomeLayout> {
     final overlay = Overlay.of(context);
     overlay.insert(overlayEntry);
 
-    // Auto-dismiss after 5 seconds
+  
     Future.delayed(const Duration(seconds: 5), () {
       if (overlayEntry.mounted) {
         overlayEntry.remove();
@@ -56,7 +56,7 @@ class _HomeLayoutState extends ConsumerState<HomeLayout> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Listen to real-time notifications
+  
     ref.listen<AsyncValue<NotificationPayload>>(notificationStreamProvider, (previous, next) {
       next.whenData((payload) {
         if (payload.isArticleNotification) {
@@ -66,7 +66,7 @@ class _HomeLayoutState extends ConsumerState<HomeLayout> {
     });
 
     return Scaffold(
-      extendBody: true, // Allows body to go behind the transparent nav bar
+      extendBody: true, 
       body: _pages[_currentIndex],
       bottomNavigationBar: SafeArea(
         child: Container(

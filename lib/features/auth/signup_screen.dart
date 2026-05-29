@@ -56,13 +56,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Beautiful Mesh Gradient Background
+          
           Positioned.fill(
             child: Container(
               color: isDark ? const Color(0xFF07070A) : const Color(0xFFF6F8FC),
             ),
           ),
-          // Glowing Orb 1
+       
           Positioned(
             top: -100,
             right: -100,
@@ -80,7 +80,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               ),
             ),
           ),
-          // Glowing Orb 2
+         
           Positioned(
             bottom: -50,
             left: -150,
@@ -98,7 +98,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               ),
             ),
           ),
-          // Subtle grid pattern overlay
+          
           Positioned.fill(
             child: Opacity(
               opacity: isDark ? 0.015 : 0.03,
@@ -108,7 +108,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             ),
           ),
 
-          // 2. Back Button
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(left: 12.0, top: 12.0),
@@ -119,7 +118,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             ),
           ),
 
-          // 3. Scrollable Content Layer
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -154,7 +152,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Glassmorphic Signup Card
                       ClipRRect(
                         borderRadius: BorderRadius.circular(28),
                         child: BackdropFilter(
@@ -265,7 +262,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                       const SizedBox(height: 28),
 
-                      // Sign In Footer
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -308,7 +304,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 }
 
-// Grid Background Painter (matches Login)
+
 class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

@@ -48,11 +48,7 @@ class Article {
       ].map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 
       if (candidates.isEmpty) return '';
-
-      // Prefer the longest non-empty payload, which is usually full article text.
       final best = candidates.reduce((a, b) => a.length >= b.length ? a : b);
-
-      // News APIs sometimes append " ... [+1234 chars]" to truncated snippets.
       return best.replaceAll(RegExp(r'\s*\[\+\d+\s+chars\]\s*$'), '').trim();
     }
 
@@ -81,7 +77,6 @@ class Article {
     };
   }
 
-  /// Compact payload for bookmark API (avoids oversized request bodies).
   Map<String, dynamic> toBookmarkJson() {
     const maxContentLength = 4000;
     final trimmedContent = content.length > maxContentLength

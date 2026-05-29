@@ -549,7 +549,7 @@ final bookmarksProvider =
       return BookmarksNotifier(ref);
     });
 
-/// Original English article from feeds (before UI translation layer).
+
 Article resolveEnglishArticle(Ref ref, Article article) {
   for (final source in [
     ref.read(recommendedFeedProvider).articles,

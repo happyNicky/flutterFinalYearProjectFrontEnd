@@ -2,9 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:io';
 
 class ApiConstants {
-  /// Set after Railway deploy: Settings → Networking → Generate Domain.
-  /// Override at build time:
-  /// `flutter run --dart-define=API_BASE_URL=https://your-app.up.railway.app`
+  
   static const String railwayBaseUrl =
       'https://flutternewsapp-production.up.railway.app';
 

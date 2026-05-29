@@ -83,13 +83,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Beautiful Mesh Gradient Background
+          
           Positioned.fill(
             child: Container(
               color: isDark ? const Color(0xFF07070A) : const Color(0xFFF6F8FC),
             ),
           ),
-          // Glowing Orb 1
+          
           Positioned(
             top: -100,
             right: -100,
@@ -107,7 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-          // Glowing Orb 2
+         
           Positioned(
             bottom: -50,
             left: -150,
@@ -126,7 +126,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-          // Subtle grid pattern overlay
+          
           Positioned.fill(
             child: Opacity(
               opacity: isDark ? 0.015 : 0.03,
@@ -134,7 +134,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
 
-          // 2. Scrollable Content Layer
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -157,7 +156,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Logo Icon
+                      
                       Center(
                         child: Container(
                           padding: const EdgeInsets.all(16),
@@ -199,7 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Glassmorphic Login Card
+                      
                       ClipRRect(
                         borderRadius: BorderRadius.circular(28),
                         child: BackdropFilter(
@@ -318,7 +317,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 28),
 
-                      // Or Divider
+                    
                       Row(
                         children: [
                           Expanded(
@@ -352,7 +351,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 28),
 
-                      // Sign Up Footer
+                    
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -394,7 +393,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-// 3. Grid Background Painter
+
 class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -416,7 +415,7 @@ class _GridPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// 4. Google sign-in button
+
 class _GoogleSignInButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onPressed;
@@ -482,7 +481,7 @@ class _GoogleSignInButton extends StatelessWidget {
   }
 }
 
-// 5. Google Logo Painter
+
 class _GoogleLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -512,63 +511,58 @@ class _GoogleLogoPainter extends CustomPainter {
       ..arcTo(
         Rect.fromCircle(center: Offset(cx, cy), radius: r),
         0.0,
-        0.75, // around 43 degrees
+        0.75, 
         false,
       )
       ..lineTo(cx, cy)
       ..close();
-    // Google logo has specific path, we can paint beautiful segments to represent Google branding
-    // segment 1: blue horizontal bar and bottom arc
+    
     final double sweepAngle = 360 / 4 * (3.14159 / 180);
 
-    // Let's paint 4 quadrants with standard google colors for clean visuals
+    
     canvas.drawArc(
       Rect.fromLTWH(0, 0, w, h),
       -0.785,
       1.57,
       true,
       paintRed,
-    ); // Top Red
+    ); 
     canvas.drawArc(
       Rect.fromLTWH(0, 0, w, h),
       0.785,
       1.57,
       true,
       paintYellow,
-    ); // Left Yellow
+    ); 
     canvas.drawArc(
       Rect.fromLTWH(0, 0, w, h),
       2.355,
       1.57,
       true,
       paintGreen,
-    ); // Bottom Green
+    ); 
     canvas.drawArc(
       Rect.fromLTWH(0, 0, w, h),
       -2.355,
       1.57,
       true,
       paintBlue,
-    ); // Right Blue
+    ); 
 
-    // Draw smaller center circle to make it look like a ring/G
+    
     final Paint paintBackground = Paint()
       ..color = const Color(0x00FFFFFF)
       ..blendMode = BlendMode.clear;
     canvas.drawCircle(Offset(cx, cy), r * 0.5, paintBackground);
 
-    // Standard drawing of a simplified beautiful colored wheel representing Google color scheme
-    // We can also draw it using standard arcs
+  
     final Paint paintWhite = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
-    // We can clean the center
+  
     canvas.drawCircle(Offset(cx, cy), r * 0.5, paintWhite);
 
-    // To make it look like a clean google logo, we can paint a circle overlay
-    // Or we can just let it blend. Let's make sure the background matches the button background
-    // Since button background is white or near-black, we will draw a solid circle of the corresponding color
-    // but even simpler: let's draw four distinct colored arc sectors with a white/dark center
+   
   }
 
   @override
