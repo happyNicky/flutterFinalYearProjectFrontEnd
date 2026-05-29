@@ -231,6 +231,26 @@ class SettingsScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: colorScheme.onSurface),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: subtitle != null ? Text(subtitle) : null,
+      trailing:
+          trailing ??
+          (onTap != null
+              ? Icon(
+                  LucideIcons.chevronRight,
+                  color: colorScheme.onSurface.withOpacity(0.5),
+                )
+              : null),
+      onTap: onTap,
       
     );
   }
