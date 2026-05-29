@@ -22,10 +22,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _login() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final success = await ref.read(authProvider.notifier).login(
-          _emailController.text.trim(),
-          _passwordController.text,
-        );
+    final success = await ref
+        .read(authProvider.notifier)
+        .login(_emailController.text.trim(), _passwordController.text);
 
     if (mounted) {
       if (success) {
@@ -34,29 +33,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         final error = ref.read(authProvider).errorMessage ?? 'Login failed';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error, style: const TextStyle(fontWeight: FontWeight.w600)),
+            content: Text(
+              error,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         );
       }
     }
   }
 
-  void _loginSocial(String provider) async {
-    final success = await ref.read(authProvider.notifier).loginWithOAuth(provider);
+  void _loginWithGoogle() async {
+    final success = await ref.read(authProvider.notifier).signInWithGoogle();
     if (mounted) {
       if (success) {
         context.go('/home');
       } else {
-        final error = ref.read(authProvider).errorMessage ?? 'OAuth Login failed';
+        final error =
+            ref.read(authProvider).errorMessage ?? 'OAuth Login failed';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error, style: const TextStyle(fontWeight: FontWeight.w600)),
+            content: Text(
+              error,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         );
       }
@@ -108,7 +118,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    (isDark ? const Color(0xFF8B5CF6) : const Color(0xFFC084FC)).withOpacity(isDark ? 0.2 : 0.12),
+                    (isDark ? const Color(0xFF8B5CF6) : const Color(0xFFC084FC))
+                        .withOpacity(isDark ? 0.2 : 0.12),
                     colorScheme.primary.withOpacity(0.0),
                   ],
                 ),
@@ -119,9 +130,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Positioned.fill(
             child: Opacity(
               opacity: isDark ? 0.015 : 0.03,
-              child: CustomPaint(
-                painter: _GridPainter(),
-              ),
+              child: CustomPaint(painter: _GridPainter()),
             ),
           ),
 
@@ -130,7 +139,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Center(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 24.0,
+                ),
                 child: TweenAnimationBuilder<double>(
                   tween: Tween<double>(begin: 0.0, end: 1.0),
                   duration: const Duration(milliseconds: 800),
@@ -138,10 +150,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   builder: (context, value, child) {
                     return Transform.translate(
                       offset: Offset(0, 30 * (1 - value)),
-                      child: Opacity(
-                        opacity: value,
-                        child: child,
-                      ),
+                      child: Opacity(opacity: value, child: child),
                     );
                   },
                   child: Column(
@@ -209,7 +218,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(isDark ? 0.15 : 0.05),
+                                  color: Colors.black.withOpacity(
+                                    isDark ? 0.15 : 0.05,
+                                  ),
                                   blurRadius: 30,
                                   offset: const Offset(0, 15),
                                 ),
@@ -233,7 +244,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   Text(
                                     'Sign in to personalize your daily news feed',
                                     style: textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.onSurface.withOpacity(0.6),
+                                      color: colorScheme.onSurface.withOpacity(
+                                        0.6,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 28),
@@ -244,11 +257,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     prefixIcon: LucideIcons.mail,
                                     controller: _emailController,
                                     validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
                                         return 'Email is required';
                                       }
-                                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                          .hasMatch(value.trim())) {
+                                      if (!RegExp(
+                                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                      ).hasMatch(value.trim())) {
                                         return 'Please enter a valid email';
                                       }
                                       return null;
@@ -306,7 +321,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       // Or Divider
                       Row(
                         children: [
-                          Expanded(child: Divider(color: colorScheme.onSurface.withOpacity(0.1))),
+                          Expanded(
+                            child: Divider(
+                              color: colorScheme.onSurface.withOpacity(0.1),
+                            ),
+                          ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
@@ -318,32 +337,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                             ),
                           ),
-                          Expanded(child: Divider(color: colorScheme.onSurface.withOpacity(0.1))),
+                          Expanded(
+                            child: Divider(
+                              color: colorScheme.onSurface.withOpacity(0.1),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
 
-                      // Social Buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _SocialButton(
-                              iconPath: 'google',
-                              label: 'Google',
-                              isLoading: authState.isLoading,
-                              onPressed: () => _loginSocial('google'),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _SocialButton(
-                              iconPath: 'github',
-                              label: 'GitHub',
-                              isLoading: authState.isLoading,
-                              onPressed: () => _loginSocial('github'),
-                            ),
-                          ),
-                        ],
+                      _GoogleSignInButton(
+                        isLoading: authState.isLoading,
+                        onPressed: _loginWithGoogle,
                       ),
                       const SizedBox(height: 28),
 
@@ -411,42 +416,22 @@ class _GridPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// 4. Custom Social Button Component
-class _SocialButton extends StatelessWidget {
-  final String iconPath;
-  final String label;
+// 4. Google sign-in button
+class _GoogleSignInButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onPressed;
 
-  const _SocialButton({
-    required this.iconPath,
-    required this.label,
-    required this.isLoading,
-    required this.onPressed,
-  });
+  const _GoogleSignInButton({required this.isLoading, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    Widget iconWidget;
-    if (iconPath == 'google') {
-      // Paint standard Google multi-color colors or custom icon layout
-      iconWidget = SizedBox(
-        width: 20,
-        height: 20,
-        child: CustomPaint(
-          painter: _GoogleLogoPainter(),
-        ),
-      );
-    } else {
-      iconWidget = Icon(
-        LucideIcons.github,
-        size: 20,
-        color: isDark ? Colors.white : Colors.black,
-      );
-    }
+    final iconWidget = SizedBox(
+      width: 20,
+      height: 20,
+      child: CustomPaint(painter: _GoogleLogoPainter()),
+    );
 
     return Container(
       height: 56,
@@ -466,7 +451,9 @@ class _SocialButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           side: BorderSide(
-            color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08),
+            color: isDark
+                ? Colors.white.withOpacity(0.08)
+                : Colors.black.withOpacity(0.08),
             width: 1.2,
           ),
           backgroundColor: isDark
@@ -481,7 +468,7 @@ class _SocialButton extends StatelessWidget {
             iconWidget,
             const SizedBox(width: 12),
             Text(
-              label,
+              'Continue with Google',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -535,10 +522,34 @@ class _GoogleLogoPainter extends CustomPainter {
     final double sweepAngle = 360 / 4 * (3.14159 / 180);
 
     // Let's paint 4 quadrants with standard google colors for clean visuals
-    canvas.drawArc(Rect.fromLTWH(0, 0, w, h), -0.785, 1.57, true, paintRed); // Top Red
-    canvas.drawArc(Rect.fromLTWH(0, 0, w, h), 0.785, 1.57, true, paintYellow); // Left Yellow
-    canvas.drawArc(Rect.fromLTWH(0, 0, w, h), 2.355, 1.57, true, paintGreen); // Bottom Green
-    canvas.drawArc(Rect.fromLTWH(0, 0, w, h), -2.355, 1.57, true, paintBlue); // Right Blue
+    canvas.drawArc(
+      Rect.fromLTWH(0, 0, w, h),
+      -0.785,
+      1.57,
+      true,
+      paintRed,
+    ); // Top Red
+    canvas.drawArc(
+      Rect.fromLTWH(0, 0, w, h),
+      0.785,
+      1.57,
+      true,
+      paintYellow,
+    ); // Left Yellow
+    canvas.drawArc(
+      Rect.fromLTWH(0, 0, w, h),
+      2.355,
+      1.57,
+      true,
+      paintGreen,
+    ); // Bottom Green
+    canvas.drawArc(
+      Rect.fromLTWH(0, 0, w, h),
+      -2.355,
+      1.57,
+      true,
+      paintBlue,
+    ); // Right Blue
 
     // Draw smaller center circle to make it look like a ring/G
     final Paint paintBackground = Paint()
@@ -553,7 +564,7 @@ class _GoogleLogoPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     // We can clean the center
     canvas.drawCircle(Offset(cx, cy), r * 0.5, paintWhite);
-    
+
     // To make it look like a clean google logo, we can paint a circle overlay
     // Or we can just let it blend. Let's make sure the background matches the button background
     // Since button background is white or near-black, we will draw a solid circle of the corresponding color
@@ -563,4 +574,3 @@ class _GoogleLogoPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

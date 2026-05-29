@@ -48,7 +48,7 @@ class NotificationService {
       iOS: iOSPlatformChannelSpecifics,
     );
     await flutterLocalNotificationsPlugin.show(
-      id: 0,
+      id: title.hashCode.abs() % 100000,
       title: title,
       body: body,
       notificationDetails: platformChannelSpecifics,

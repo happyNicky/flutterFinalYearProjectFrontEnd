@@ -9,6 +9,8 @@ import '../../models/article_model.dart';
 import '../auth/providers/auth_provider.dart';
 import 'providers/news_provider.dart';
 import 'providers/location_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/translated_articles_provider.dart';
 import '../../core/localization/language_provider.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
@@ -18,13 +20,22 @@ class FeedScreen extends ConsumerStatefulWidget {
   ConsumerState<FeedScreen> createState() => _FeedScreenState();
 }
 
-class _FeedScreenState extends ConsumerState<FeedScreen> {
+class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObserver {
   late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _scrollController = ScrollController()..addListener(_onScroll);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(recommendedFeedProvider.notifier).syncNewOnResume();
+      ref.read(trendingNewsProvider.notifier).syncNewOnResume();
+    }
   }
 
   void _onScroll() {
@@ -37,6 +48,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -62,9 +74,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
     final authState = ref.watch(authProvider);
     final trendingNews = ref.watch(trendingNewsProvider);
+    final trendingArticles = ref.watch(trendingTranslatedProvider).valueOrNull ??
+        trendingNews.articles;
     final recommendedFeed = ref.watch(recommendedFeedProvider);
+    final recommendedArticles =
+        ref.watch(recommendedTranslatedProvider).valueOrNull ??
+            recommendedFeed.articles;
     final locationState = ref.watch(locationProvider);
-    final lang = ref.watch(languageProvider); 
+    final notificationCount = ref.watch(notificationBadgeCountProvider);
+    ref.watch(languageProvider);
 
     String greetingKey() {
       final hour = DateTime.now().hour;
@@ -122,9 +140,36 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                       shape: BoxShape.circle,
                     ),
-                    child: IconButton(
-                      icon: Icon(LucideIcons.bell, color: colorScheme.onSurface),
-                      onPressed: () => context.push('/notifications'),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: Icon(LucideIcons.bell, color: colorScheme.onSurface),
+                          onPressed: () => context.push('/notifications'),
+                        ),
+                        if (notificationCount > 0)
+                          Positioned(
+                            right: 6,
+                            top: 6,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: colorScheme.error,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                              child: Text(
+                                notificationCount > 9 ? '9+' : '$notificationCount',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: colorScheme.onError,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -146,7 +191,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () => ref.invalidate(trendingNewsProvider),
+                        onTap: () => ref.read(trendingNewsProvider.notifier).refresh(),
                         child: Text(
                           context.tr('refresh', ref: ref),
                           style: textTheme.labelLarge?.copyWith(
@@ -164,23 +209,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 320,
-                  child: trendingNews.when(
-                    data: (articles) {
-                      if (articles.isEmpty) {
-                        return Center(child: Text(context.tr('no_articles_found', ref: ref)));
-                      }
-                      return ListView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: articles.length,
-                        itemBuilder: (context, index) {
-                          return _buildTrendingCard(context, ref, articles[index]);
-                        },
-                      );
-                    },
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (err, stack) => Center(child: Text(context.tr('failed_trending', ref: ref))),
+                  child: _buildTrendingSection(
+                    context,
+                    ref,
+                    trendingNews,
+                    trendingArticles,
                   ),
                 ),
               ),
@@ -326,12 +359,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildNewsListItem(context, ref, recommendedFeed.articles[index]),
-                      childCount: recommendedFeed.articles.length,
+                      (context, index) => _buildNewsListItem(
+                            context,
+                            ref,
+                            recommendedArticles[index],
+                          ),
+                      childCount: recommendedArticles.length,
                     ),
                   ),
                 ),
-              if (recommendedFeed.isLoading)
+              if (recommendedFeed.isLoading && recommendedFeed.articles.isNotEmpty)
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
@@ -343,6 +380,30 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTrendingSection(
+    BuildContext context,
+    WidgetRef ref,
+    TrendingNewsState trending,
+    List<Article> articles,
+  ) {
+    if (trending.articles.isEmpty && trending.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (articles.isEmpty) {
+      return Center(child: Text(context.tr('no_articles_found', ref: ref)));
+    }
+
+    return ListView.builder(
+      physics: const BouncingScrollPhysics(),
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: articles.length,
+      itemBuilder: (context, index) {
+        return _buildTrendingCard(context, ref, articles[index]);
+      },
     );
   }
 
@@ -537,8 +598,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                           color: isSaved ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.5),
                           size: 20,
                         ),
-                        onPressed: () {
-                          ref.read(bookmarksProvider.notifier).toggleBookmark(article);
+                        onPressed: () async {
+                          final result = await ref
+                              .read(bookmarksProvider.notifier)
+                              .toggleBookmark(article);
+                          if (!context.mounted || result.success) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result.errorMessage ?? 'Bookmark failed.',
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
                         },
                       ),
                     ],

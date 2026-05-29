@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../models/article_model.dart';
+import '../../services/translation_service.dart';
+import '../../core/localization/language_provider.dart';
 import 'providers/notification_provider.dart';
+import 'providers/read_articles_provider.dart';
+import 'providers/translated_articles_provider.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -17,6 +22,40 @@ class NotificationsScreen extends ConsumerWidget {
       return '${difference.inMinutes}m ago';
     } else {
       return 'Just now';
+    }
+  }
+
+  Future<void> _openArticle(
+    BuildContext context,
+    WidgetRef ref,
+    NotificationPayload notification,
+  ) async {
+    if (!notification.isArticleNotification) return;
+
+    Article? article = notification.toArticle();
+    article ??= findArticleById(ref as Ref<Object?>, notification.articleId!);
+
+    if (article == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Article is no longer available in your feed.'),
+          ),
+        );
+      }
+      return;
+    }
+
+    final lang = ref.read(languageProvider);
+    if (lang == 'am') {
+      article = await TranslationService().translateArticle(article);
+    }
+
+    ref.read(notificationHistoryProvider.notifier).markAsRead(notification.id);
+    ref.read(readArticlesProvider.notifier).markAsRead(article.id);
+
+    if (context.mounted) {
+      context.push('/article', extra: article);
     }
   }
 
@@ -101,6 +140,8 @@ class NotificationsScreen extends ConsumerWidget {
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
+                final canOpen = notification.isArticleNotification;
+
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   margin: const EdgeInsets.only(bottom: 12),
@@ -116,6 +157,9 @@ class NotificationsScreen extends ConsumerWidget {
                       horizontal: 16,
                       vertical: 8,
                     ),
+                    onTap: canOpen
+                        ? () => _openArticle(context, ref, notification)
+                        : null,
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -151,11 +195,50 @@ class NotificationsScreen extends ConsumerWidget {
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 6.0),
                       child: Text(
-                        notification.message,
+                        canOpen
+                            ? notification.message
+                            : '${notification.message}\nTap actions on the right.',
                         style: TextStyle(
                           color: colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
+                    ),
+                    trailing: Wrap(
+                      spacing: 4,
+                      children: [
+                        if (canOpen)
+                          Icon(
+                            LucideIcons.chevronRight,
+                            size: 18,
+                            color: colorScheme.primary,
+                          ),
+                        IconButton(
+                          tooltip: 'Mark as read',
+                          icon: Icon(
+                            LucideIcons.checkCheck,
+                            size: 18,
+                            color: colorScheme.primary,
+                          ),
+                          onPressed: () {
+                            ref
+                                .read(notificationHistoryProvider.notifier)
+                                .markAsRead(notification.id);
+                          },
+                        ),
+                        IconButton(
+                          tooltip: 'Delete notification',
+                          icon: Icon(
+                            LucideIcons.trash2,
+                            size: 18,
+                            color: colorScheme.error,
+                          ),
+                          onPressed: () {
+                            ref
+                                .read(notificationHistoryProvider.notifier)
+                                .deleteNotification(notification.id);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 );

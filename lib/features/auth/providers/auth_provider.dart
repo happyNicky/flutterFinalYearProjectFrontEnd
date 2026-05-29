@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/auth_constants.dart';
 
 class AuthState {
   final bool isLoading;
@@ -43,8 +45,18 @@ class AuthState {
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
+  GoogleSignIn? _googleSignIn;
+
   AuthNotifier() : super(AuthState()) {
     tryAutoLogin();
+  }
+
+  GoogleSignIn get _google {
+    _googleSignIn ??= GoogleSignIn(
+      scopes: const ['email', 'profile'],
+      serverClientId: AuthConstants.googleServerClientId,
+    );
+    return _googleSignIn!;
   }
 
   Future<void> tryAutoLogin() async {
@@ -164,17 +176,93 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<bool> loginWithOAuth(String provider) async {
+  Future<bool> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    state = state.copyWith(
-      isLoading: false,
-      errorMessage:
-          'OAuth login is disabled in app flow. Use email and password.',
-    );
-    return false;
+    try {
+      await _google.signOut();
+
+      final account = await _google.signIn();
+      if (account == null) {
+        state = state.copyWith(isLoading: false);
+        return false;
+      }
+
+      final googleAuth = await account.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null || idToken.isEmpty) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage:
+              'Could not get a Google ID token. In Google Cloud, add an Android OAuth client for package com.example.flutter_news_app with your debug SHA-1.',
+        );
+        return false;
+      }
+
+      final response = await http.post(
+        Uri.parse('${ApiConstants.baseUrl}${AuthConstants.googleAuthPath}'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'idToken': idToken}),
+      );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        final msg = _extractErrorMessage(response.body) ??
+            'Google sign-in failed (${response.statusCode}). Is the backend running on port 8080?';
+        state = state.copyWith(isLoading: false, errorMessage: msg);
+        return false;
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final token = data['token']?.toString();
+      final userEmail =
+          data['email']?.toString() ?? account.email ?? 'user@google.com';
+      final userName = data['name']?.toString() ??
+          account.displayName ??
+          userEmail.split('@').first;
+
+      if (token == null || token.isEmpty) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Google sign-in failed: missing token from server.',
+        );
+        return false;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', token);
+      await prefs.setString('auth_email', userEmail);
+      await prefs.setString('auth_name', userName);
+
+      state = AuthState(
+        token: token,
+        email: userEmail,
+        name: userName,
+        isInitialized: true,
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _googleSignInErrorMessage(e),
+      );
+      return false;
+    }
+  }
+
+  String _googleSignInErrorMessage(Object e) {
+    final text = e.toString();
+    if (text.contains('ApiException: 10')) {
+      return 'Google Sign-In setup error (code 10). In Google Cloud Console, create an Android OAuth client with package name com.example.flutter_news_app and your debug SHA-1 fingerprint.';
+    }
+    if (text.contains('SocketException') || text.contains('Failed host lookup')) {
+      return 'Cannot reach the backend. Start Spring Boot on port 8080 and use an emulator (10.0.2.2) or set the correct API URL for a physical device.';
+    }
+    return 'Google sign-in failed: $text';
   }
 
   Future<void> logout() async {
+    try {
+      await _google.signOut();
+    } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     await prefs.remove('auth_email');

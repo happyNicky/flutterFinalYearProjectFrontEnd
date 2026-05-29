@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/translation_service.dart';
 
 final languageProvider = StateNotifierProvider<LanguageNotifier, String>((ref) {
   return LanguageNotifier();
@@ -22,6 +23,7 @@ class LanguageNotifier extends StateNotifier<String> {
   Future<void> setLanguage(String lang) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('app_language', lang);
+    TranslationService().clearCache();
     state = lang;
   }
 

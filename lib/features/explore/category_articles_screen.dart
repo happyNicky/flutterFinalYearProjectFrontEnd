@@ -156,8 +156,18 @@ class CategoryArticlesScreen extends ConsumerWidget {
                                     color: isSaved ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.5),
                                     size: 18,
                                   ),
-                                  onPressed: () {
-                                    ref.read(bookmarksProvider.notifier).toggleBookmark(article);
+                                  onPressed: () async {
+                                    final result = await ref
+                                        .read(bookmarksProvider.notifier)
+                                        .toggleBookmark(article);
+                                    if (!context.mounted || result.success) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          result.errorMessage ?? 'Bookmark failed.',
+                                        ),
+                                      ),
+                                    );
                                   },
                                 ),
                               ],

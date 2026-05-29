@@ -1,10 +1,23 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../models/article_model.dart';
 import '../core/constants/api_constants.dart';
 
 final newsServiceProvider = Provider((ref) => NewsService());
+
+class BookmarkToggleResult {
+  final bool success;
+  final bool bookmarked;
+  final String? errorMessage;
+
+  const BookmarkToggleResult({
+    required this.success,
+    required this.bookmarked,
+    this.errorMessage,
+  });
+}
 
 class NewsService {
   String get _baseUrl => ApiConstants.baseUrl;
@@ -61,29 +74,69 @@ class NewsService {
     return _parseArticleList(response.body);
   }
 
-  // --- BOOKMARKS SYNC & STORAGE ---
-
   Future<List<Article>> getBookmarks(String token) async {
     final response = await http.get(
       Uri.parse('$_baseUrl/api/bookmarks'),
       headers: _authHeader(token),
     );
-    if (response.statusCode != 200) return [];
+    if (response.statusCode == 401 ||
+        response.statusCode == 302 ||
+        response.statusCode == 301) {
+      throw Exception('Session expired. Please log in again.');
+    }
+    if (response.statusCode != 200) {
+      debugPrint('getBookmarks failed: ${response.statusCode} ${response.body}');
+      throw Exception('Failed to load bookmarks (${response.statusCode}).');
+    }
     return _parseArticleList(response.body);
   }
 
-  Future<bool> toggleBookmark(String token, Article article) async {
+  Future<BookmarkToggleResult> toggleBookmark(String token, Article article) async {
+    if (article.id.trim().isEmpty) {
+      return const BookmarkToggleResult(
+        success: false,
+        bookmarked: false,
+        errorMessage: 'This article cannot be bookmarked (missing id).',
+      );
+    }
+
     final response = await http.post(
       Uri.parse('$_baseUrl/api/bookmarks/toggle'),
       headers: _authHeader(token),
-      body: jsonEncode(article.toJson()),
+      body: jsonEncode(article.toBookmarkJson()),
     );
-    if (response.statusCode != 200) return false;
+
+    if (response.statusCode == 401 ||
+        response.statusCode == 302 ||
+        response.statusCode == 301) {
+      return const BookmarkToggleResult(
+        success: false,
+        bookmarked: false,
+        errorMessage: 'Session expired. Please log in again.',
+      );
+    }
+
+    if (response.statusCode != 200) {
+      debugPrint('toggleBookmark failed: ${response.statusCode} ${response.body}');
+      return BookmarkToggleResult(
+        success: false,
+        bookmarked: false,
+        errorMessage: 'Bookmark failed (${response.statusCode}).',
+      );
+    }
+
     try {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      return data['bookmarked'] == true;
-    } catch (_) {
-      return false;
+      final raw = data['bookmarked'];
+      final bookmarked = raw == true || raw == 'true';
+      return BookmarkToggleResult(success: true, bookmarked: bookmarked);
+    } catch (e) {
+      debugPrint('toggleBookmark parse error: $e');
+      return const BookmarkToggleResult(
+        success: false,
+        bookmarked: false,
+        errorMessage: 'Invalid bookmark response from server.',
+      );
     }
   }
 
@@ -97,12 +150,20 @@ class NewsService {
 
   List<Article> _parseArticleList(String body) {
     final data = jsonDecode(body);
-    if (data is! List) return [];
-    return data
+    List<dynamic> items;
+    if (data is List) {
+      items = data;
+    } else if (data is Map && data['bookmarks'] is List) {
+      items = data['bookmarks'] as List;
+    } else {
+      return [];
+    }
+
+    return items
         .whereType<Map>()
         .map((item) => Map<String, dynamic>.from(item))
         .map(Article.fromJson)
+        .where((article) => article.id.trim().isNotEmpty)
         .toList();
   }
-
 }

@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/article_model.dart';
 import 'providers/news_provider.dart';
 import 'providers/read_articles_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/translated_articles_provider.dart';
 import '../../core/localization/language_provider.dart';
 
 class ArticleDetailScreen extends ConsumerWidget {
@@ -30,18 +32,28 @@ class ArticleDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    
     // Mark article as read after frame is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(readArticlesProvider.notifier).markAsRead(article.id);
+      ref.read(notificationHistoryProvider.notifier).clearForArticle(article.id);
     });
 
-    // Watch languageProvider so the screen invalidates on language changes
     ref.watch(languageProvider);
+    final displayArticle = ref.watch(translatedArticleProvider(article));
 
-    // Watch bookmarks state to determine if this article is saved
+    return displayArticle.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, __) => _buildScaffold(context, ref, article),
+      data: (translated) => _buildScaffold(context, ref, translated),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, WidgetRef ref, Article displayArticle) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     final isSaved = ref.watch(bookmarksProvider).maybeWhen(
           data: (list) => list.any((a) => a.id == article.id),
           orElse: () => false,
@@ -80,19 +92,22 @@ class ArticleDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 onPressed: () async {
-                  final isNowBookmarked = await ref.read(bookmarksProvider.notifier).toggleBookmark(article);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          isNowBookmarked 
-                            ? context.tr('article_bookmarked', ref: ref) 
-                            : context.tr('bookmark_removed', ref: ref)
-                        ),
-                        duration: const Duration(seconds: 1),
+                  final result = await ref
+                      .read(bookmarksProvider.notifier)
+                      .toggleBookmark(article);
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        !result.success
+                            ? (result.errorMessage ?? 'Bookmark failed.')
+                            : result.bookmarked
+                                ? context.tr('article_bookmarked', ref: ref)
+                                : context.tr('bookmark_removed', ref: ref),
                       ),
-                    );
-                  }
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
                 },
               ),
               IconButton(
@@ -105,7 +120,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                   child: const Icon(LucideIcons.share2, color: Colors.white, size: 20),
                 ),
                 onPressed: () {
-                  final shareText = '📰 *${article.title}*\n\n${article.content.length > 120 ? "${article.content.substring(0, 120)}..." : article.content}\n\n🔗 ${context.tr('read_full_article', ref: ref)}${article.id}';
+                  final shareText = '📰 *${displayArticle.title}*\n\n${displayArticle.content.length > 120 ? "${displayArticle.content.substring(0, 120)}..." : displayArticle.content}\n\n🔗 ${context.tr('read_full_article', ref: ref)}${displayArticle.id}';
                   Share.share(shareText);
                 },
               ),
@@ -116,7 +131,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                 fit: StackFit.expand,
                 children: [
                   CachedNetworkImage(
-                    imageUrl: article.imageUrl,
+                    imageUrl: displayArticle.imageUrl,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(color: Colors.black12),
                     errorWidget: (context, url, error) => Container(
@@ -158,7 +173,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      article.category,
+                      displayArticle.category,
                       style: TextStyle(
                         color: colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -168,7 +183,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    article.title,
+                    displayArticle.title,
                     style: textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onSurface,
@@ -181,7 +196,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                         radius: 20,
                         backgroundColor: colorScheme.primary.withOpacity(0.1),
                         child: Text(
-                          article.author.isNotEmpty ? article.author[0].toUpperCase() : 'A',
+                          displayArticle.author.isNotEmpty ? displayArticle.author[0].toUpperCase() : 'A',
                           style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -191,13 +206,13 @@ class ArticleDetailScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              article.author,
+                              displayArticle.author,
                               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              '${article.readTimeMinutes} ${context.tr('min_read', ref: ref)} • ${_timeAgo(context, ref, article.publishedAt)}',
+                              '${displayArticle.readTimeMinutes} ${context.tr('min_read', ref: ref)} • ${_timeAgo(context, ref, displayArticle.publishedAt)}',
                               style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.6)),
                             ),
                           ],
@@ -207,14 +222,14 @@ class ArticleDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    article.content,
+                    displayArticle.content,
                     style: textTheme.bodyLarge?.copyWith(
                       height: 1.8,
                       color: colorScheme.onSurface.withOpacity(0.85),
                     ),
                   ),
                   const SizedBox(height: 32),
-                  if (article.id.startsWith('http'))
+                  if (displayArticle.id.startsWith('http'))
                     Center(
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
@@ -222,7 +237,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         ),
                         onPressed: () async {
-                          final uri = Uri.parse(article.id);
+                          final uri = Uri.parse(displayArticle.id);
                           if (await canLaunchUrl(uri)) {
                             await launchUrl(uri, mode: LaunchMode.externalApplication);
                           } else {

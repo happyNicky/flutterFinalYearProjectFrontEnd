@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 import '../news/providers/news_provider.dart';
+import '../news/providers/translated_articles_provider.dart';
 import '../../core/localization/language_provider.dart';
 
 class BookmarksScreen extends ConsumerWidget {
@@ -27,8 +28,8 @@ class BookmarksScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final bookmarksAsync = ref.watch(bookmarksProvider);
-    final lang = ref.watch(languageProvider); // Listen to language changes
+    ref.watch(languageProvider);
+    final bookmarksAsync = ref.watch(bookmarksTranslatedProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -142,8 +143,10 @@ class BookmarksScreen extends ConsumerWidget {
                                     color: colorScheme.primary,
                                     size: 18,
                                   ),
-                                  onPressed: () {
-                                    ref.read(bookmarksProvider.notifier).toggleBookmark(article);
+                                  onPressed: () async {
+                                    await ref
+                                        .read(bookmarksProvider.notifier)
+                                        .toggleBookmark(article);
                                   },
                                 ),
                               ],

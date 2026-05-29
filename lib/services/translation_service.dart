@@ -10,6 +10,10 @@ class TranslationService {
   // In-memory cache for translated articles to optimize performance and prevent rate limiting
   final Map<String, Article> _translationCache = {};
 
+  void clearCache() {
+    _translationCache.clear();
+  }
+
   Future<String> translateText(String text, {String from = 'en', String to = 'am'}) async {
     if (text.isEmpty || from == to) return text;
     

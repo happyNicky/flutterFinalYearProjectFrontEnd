@@ -59,7 +59,9 @@ class _HomeLayoutState extends ConsumerState<HomeLayout> {
     // Listen to real-time notifications
     ref.listen<AsyncValue<NotificationPayload>>(notificationStreamProvider, (previous, next) {
       next.whenData((payload) {
-        _showNotificationBanner(payload);
+        if (payload.isArticleNotification) {
+          _showNotificationBanner(payload);
+        }
       });
     });
 
