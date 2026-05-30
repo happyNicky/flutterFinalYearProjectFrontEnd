@@ -254,7 +254,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return 'Google Sign-In setup error (code 10). In Google Cloud Console, create an Android OAuth client with package name com.example.flutter_news_app and your debug SHA-1 fingerprint.';
     }
     if (text.contains('SocketException') || text.contains('Failed host lookup')) {
-      return 'Cannot reach the backend. For local dev, start Spring Boot on port 8080. For production, set API_BASE_URL to your Railway domain.';
+      return 'Cannot reach the backend. For local dev, start Spring Boot on port 8080. For production, the app uses https://flutternewsapp-5vkz.onrender.com.';
     }
     return 'Google sign-in failed: $text';
   }
