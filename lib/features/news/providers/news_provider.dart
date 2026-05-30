@@ -356,6 +356,7 @@ final categoryNewsProvider = FutureProvider.family<List<Article>, String>((
   ref,
   category,
 ) async {
+  ref.keepAlive();
   final service = ref.read(newsServiceProvider);
   final lang = ref.watch(languageProvider);
   final articles = await service.getByCategory(category);

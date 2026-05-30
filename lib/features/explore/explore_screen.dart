@@ -14,9 +14,9 @@ class ExploreScreen extends StatelessWidget {
       {'name': 'Technology', 'icon': LucideIcons.laptop},
       {'name': 'Business', 'icon': LucideIcons.briefcase},
       {'name': 'Science', 'icon': LucideIcons.microscope},
-      {'name': 'Health', 'icon': LucideIcons.heartPulse},
-      {'name': 'Sports', 'icon': LucideIcons.trophy},
-      {'name': 'Entertainment', 'icon': LucideIcons.monitorPlay},
+      {'name': 'Politics', 'icon': LucideIcons.landmark},
+      {'name': 'Sport', 'icon': LucideIcons.trophy},
+      {'name': 'Environment', 'icon': LucideIcons.leaf},
     ];
 
     final searchController = TextEditingController();

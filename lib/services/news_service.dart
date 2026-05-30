@@ -19,13 +19,32 @@ class BookmarkToggleResult {
   });
 }
 
+List<Article> parseArticleList(String body) {
+  final data = jsonDecode(body);
+  List<dynamic> items;
+  if (data is List) {
+    items = data;
+  } else if (data is Map && data['bookmarks'] is List) {
+    items = data['bookmarks'] as List;
+  } else {
+    return [];
+  }
+
+  return items
+      .whereType<Map>()
+      .map((item) => Map<String, dynamic>.from(item))
+      .map(Article.fromJson)
+      .where((article) => article.id.trim().isNotEmpty)
+      .toList();
+}
+
 class NewsService {
   String get _baseUrl => ApiConstants.baseUrl;
 
   Future<List<Article>> getTrending() async {
     final response = await http.get(Uri.parse('$_baseUrl/api/news/trending'));
     if (response.statusCode != 200) return [];
-    return _parseArticleList(response.body);
+    return compute(parseArticleList, response.body);
   }
 
   Future<List<Article>> getByCategory(String category) async {
@@ -35,7 +54,7 @@ class NewsService {
       ),
     );
     if (response.statusCode != 200) return [];
-    return _parseArticleList(response.body);
+    return compute(parseArticleList, response.body);
   }
 
   Future<List<Article>> searchNews(String query) async {
@@ -44,7 +63,7 @@ class NewsService {
       Uri.parse('$_baseUrl/api/news/search?q=${Uri.encodeComponent(query)}'),
     );
     if (response.statusCode != 200) return [];
-    return _parseArticleList(response.body);
+    return compute(parseArticleList, response.body);
   }
 
   Future<List<Article>> getRecommended({
@@ -71,7 +90,7 @@ class NewsService {
       }),
     );
     if (response.statusCode != 200) return [];
-    return _parseArticleList(response.body);
+    return compute(parseArticleList, response.body);
   }
 
   Future<List<Article>> getBookmarks(String token) async {
@@ -88,7 +107,7 @@ class NewsService {
       debugPrint('getBookmarks failed: ${response.statusCode} ${response.body}');
       throw Exception('Failed to load bookmarks (${response.statusCode}).');
     }
-    return _parseArticleList(response.body);
+    return compute(parseArticleList, response.body);
   }
 
   Future<BookmarkToggleResult> toggleBookmark(String token, Article article) async {
@@ -146,24 +165,5 @@ class NewsService {
       headers['Authorization'] = 'Bearer $token';
     }
     return headers;
-  }
-
-  List<Article> _parseArticleList(String body) {
-    final data = jsonDecode(body);
-    List<dynamic> items;
-    if (data is List) {
-      items = data;
-    } else if (data is Map && data['bookmarks'] is List) {
-      items = data['bookmarks'] as List;
-    } else {
-      return [];
-    }
-
-    return items
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .map(Article.fromJson)
-        .where((article) => article.id.trim().isNotEmpty)
-        .toList();
   }
 }
