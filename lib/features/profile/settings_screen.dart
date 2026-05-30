@@ -37,13 +37,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Card(
-            elevation: 0,
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: colorScheme.onSurface.withOpacity(0.08)),
-            ),
+        
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
