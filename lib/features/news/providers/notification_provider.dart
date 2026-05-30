@@ -214,12 +214,14 @@ final notificationStreamProvider = StreamProvider<NotificationPayload>((ref) {
 
 class NotificationHistoryNotifier
     extends StateNotifier<List<NotificationPayload>> {
-  static const _storageKey = 'notification_history_v1';
-  static const _notifiedArticlesKey = 'notified_article_ids_v1';
+  final String userKey;
+  String get _storageKey => 'notification_history_v1_$userKey';
+  String get _notifiedArticlesKey => 'notified_article_ids_v1_$userKey';
+  
   StreamSubscription<NotificationPayload>? _streamSubscription;
   Set<String> _notifiedArticleIds = {};
 
-  NotificationHistoryNotifier(Stream<NotificationPayload> stream) : super([]) {
+  NotificationHistoryNotifier(Stream<NotificationPayload> stream, {required this.userKey}) : super([]) {
     _init(stream);
   }
 
@@ -350,5 +352,7 @@ final notificationHistoryProvider =
     >((ref) {
       ref.keepAlive();
       final stream = ref.watch(notificationStreamProvider.stream);
-      return NotificationHistoryNotifier(stream);
+      final email = ref.watch(authProvider).email;
+      final userKey = (email != null && email.isNotEmpty) ? email : 'guest';
+      return NotificationHistoryNotifier(stream, userKey: userKey);
     });
