@@ -267,6 +267,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await prefs.remove('auth_token');
     await prefs.remove('auth_email');
     await prefs.remove('auth_name');
+    await prefs.remove('local_bookmarks_v1');
     state = AuthState(isInitialized: true);
   }
 
