@@ -511,8 +511,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     
-    ref.watch(bookmarksProvider);
-    final isSaved = ref.read(bookmarksProvider.notifier).isBookmarked(article.id);
+    final bookmarks = ref.watch(bookmarksProvider);
+    final isSaved = bookmarks.maybeWhen(
+      data: (list) => list.any((a) => a.id == article.id),
+      orElse: () => false,
+    );
 
     return GestureDetector(
       onTap: () => context.push('/article', extra: article),
@@ -602,15 +605,17 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
                           final result = await ref
                               .read(bookmarksProvider.notifier)
                               .toggleBookmark(article);
-                          if (!context.mounted || result.success) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                result.errorMessage ?? 'Bookmark failed.',
+                          if (!context.mounted) return;
+                          if (!result.success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  result.errorMessage ?? 'Bookmark failed.',
+                                ),
+                                duration: const Duration(seconds: 2),
                               ),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
+                            );
+                          }
                         },
                       ),
                     ],

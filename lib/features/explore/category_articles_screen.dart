@@ -85,8 +85,11 @@ class CategoryArticlesScreen extends ConsumerWidget {
               final article = articles[index];
               
           
-              ref.watch(bookmarksProvider);
-              final isSaved = ref.read(bookmarksProvider.notifier).isBookmarked(article.id);
+              final bookmarks = ref.watch(bookmarksProvider);
+              final isSaved = bookmarks.maybeWhen(
+                data: (list) => list.any((a) => a.id == article.id),
+                orElse: () => false,
+              );
 
               return GestureDetector(
                 onTap: () => context.push('/article', extra: article),
