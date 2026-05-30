@@ -164,7 +164,7 @@ extension LocalizationExtension on BuildContext {
     if (ref != null) {
       return ref.watch(languageProvider.notifier).translate(key);
     }
-    // Fallback if ref is not provided directly
+    
     return key;
   }
 }

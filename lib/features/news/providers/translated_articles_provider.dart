@@ -40,7 +40,7 @@ final translatedArticleProvider = FutureProvider.family<Article, Article>((
   return TranslationService().translateArticle(article);
 });
 
-/// Finds an article from in-memory feeds/bookmarks by id.
+
 Article? findArticleById(Ref ref, String articleId) {
   if (articleId.trim().isEmpty) return null;
 

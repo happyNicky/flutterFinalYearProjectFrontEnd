@@ -48,31 +48,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  void _loginWithGoogle() async {
-    final success = await ref.read(authProvider.notifier).signInWithGoogle();
-    if (mounted) {
-      if (success) {
-        context.go('/home');
-      } else {
-        final error =
-            ref.read(authProvider).errorMessage ?? 'OAuth Login failed';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              error,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -83,13 +58,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          
           Positioned.fill(
             child: Container(
               color: isDark ? const Color(0xFF07070A) : const Color(0xFFF6F8FC),
             ),
           ),
-          
+
           Positioned(
             top: -100,
             right: -100,
@@ -107,7 +81,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-         
+
           Positioned(
             bottom: -50,
             left: -150,
@@ -126,7 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-          
+
           Positioned.fill(
             child: Opacity(
               opacity: isDark ? 0.015 : 0.03,
@@ -153,10 +127,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     );
                   },
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      
                       Center(
                         child: Container(
                           padding: const EdgeInsets.all(16),
@@ -198,7 +170,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      
                       ClipRRect(
                         borderRadius: BorderRadius.circular(28),
                         child: BackdropFilter(
@@ -215,15 +186,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     : Colors.white.withOpacity(0.3),
                                 width: 1.5,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(
-                                    isDark ? 0.15 : 0.05,
-                                  ),
-                                  blurRadius: 30,
-                                  offset: const Offset(0, 15),
-                                ),
-                              ],
                             ),
                             padding: const EdgeInsets.all(28.0),
                             child: Form(
@@ -297,11 +259,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         style: TextStyle(
                                           color: colorScheme.primary,
                                           fontWeight: FontWeight.w600,
-                                          fontSize: 14,
                                         ),
                                       ),
                                     ),
                                   ),
+
                                   const SizedBox(height: 16),
 
                                   CustomButton(
@@ -315,43 +277,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 28),
 
-                    
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Divider(
-                              color: colorScheme.onSurface.withOpacity(0.1),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              'Or continue with',
-                              style: TextStyle(
-                                color: colorScheme.onSurface.withOpacity(0.4),
-                                fontWeight: FontWeight.w500,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              color: colorScheme.onSurface.withOpacity(0.1),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      _GoogleSignInButton(
-                        isLoading: authState.isLoading,
-                        onPressed: _loginWithGoogle,
-                      ),
-                      const SizedBox(height: 28),
-
-                    
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -393,7 +321,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-
 class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -409,160 +336,6 @@ class _GridPainter extends CustomPainter {
     for (double y = 0; y < size.height; y += step) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-
-class _GoogleSignInButton extends StatelessWidget {
-  final bool isLoading;
-  final VoidCallback onPressed;
-
-  const _GoogleSignInButton({required this.isLoading, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final iconWidget = SizedBox(
-      width: 20,
-      height: 20,
-      child: CustomPaint(painter: _GoogleLogoPainter()),
-    );
-
-    return Container(
-      height: 56,
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          side: BorderSide(
-            color: isDark
-                ? Colors.white.withOpacity(0.08)
-                : Colors.black.withOpacity(0.08),
-            width: 1.2,
-          ),
-          backgroundColor: isDark
-              ? Colors.white.withOpacity(0.02)
-              : Colors.white.withOpacity(0.8),
-          elevation: 0,
-        ),
-        onPressed: isLoading ? null : onPressed,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            iconWidget,
-            const SizedBox(width: 12),
-            Text(
-              'Continue with Google',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-class _GoogleLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double h = size.height;
-    final double cx = w / 2;
-    final double cy = h / 2;
-    final double r = w / 2;
-
-    final Paint paintRed = Paint()
-      ..color = const Color(0xFFEA4335)
-      ..style = PaintingStyle.fill;
-    final Paint paintYellow = Paint()
-      ..color = const Color(0xFFFBBC05)
-      ..style = PaintingStyle.fill;
-    final Paint paintGreen = Paint()
-      ..color = const Color(0xFF34A853)
-      ..style = PaintingStyle.fill;
-    final Paint paintBlue = Paint()
-      ..color = const Color(0xFF4285F4)
-      ..style = PaintingStyle.fill;
-
-    // Draw Blue G arc
-    final Path bluePath = Path()
-      ..moveTo(cx, cy)
-      ..relativeLineTo(r * 0.95, 0)
-      ..arcTo(
-        Rect.fromCircle(center: Offset(cx, cy), radius: r),
-        0.0,
-        0.75, 
-        false,
-      )
-      ..lineTo(cx, cy)
-      ..close();
-    
-    final double sweepAngle = 360 / 4 * (3.14159 / 180);
-
-    
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, w, h),
-      -0.785,
-      1.57,
-      true,
-      paintRed,
-    ); 
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, w, h),
-      0.785,
-      1.57,
-      true,
-      paintYellow,
-    ); 
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, w, h),
-      2.355,
-      1.57,
-      true,
-      paintGreen,
-    ); 
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, w, h),
-      -2.355,
-      1.57,
-      true,
-      paintBlue,
-    ); 
-
-    
-    final Paint paintBackground = Paint()
-      ..color = const Color(0x00FFFFFF)
-      ..blendMode = BlendMode.clear;
-    canvas.drawCircle(Offset(cx, cy), r * 0.5, paintBackground);
-
-  
-    final Paint paintWhite = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-  
-    canvas.drawCircle(Offset(cx, cy), r * 0.5, paintWhite);
-
-   
   }
 
   @override

@@ -205,7 +205,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
                 ),
               ),
               
-              // Trending Cards Horizontal List
+             
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 320,
@@ -218,7 +218,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with WidgetsBindingObse
                 ),
               ),
 
-              // Location Permission Banner
+              
               if (!locationState.hasAsked)
                 SliverToBoxAdapter(
                   child: Padding(

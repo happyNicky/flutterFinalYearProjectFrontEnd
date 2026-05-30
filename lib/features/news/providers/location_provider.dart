@@ -60,7 +60,7 @@ class LocationNotifier extends StateNotifier<LocationState> {
     final prefs = await SharedPreferences.getInstance();
     
     try {
-      // Check if location service is enabled
+      
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         await prefs.setBool('location_asked', true);
