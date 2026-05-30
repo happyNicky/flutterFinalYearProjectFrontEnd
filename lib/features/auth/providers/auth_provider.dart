@@ -206,7 +206,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
         final msg = _extractErrorMessage(response.body) ??
-            'Google sign-in failed (${response.statusCode}). Check that the backend is running and API_BASE_URL is correct.';
+            'Google sign-in failed (${response.statusCode}). Is the backend running on port 8080?';
         state = state.copyWith(isLoading: false, errorMessage: msg);
         return false;
       }
@@ -254,7 +254,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return 'Google Sign-In setup error (code 10). In Google Cloud Console, create an Android OAuth client with package name com.example.flutter_news_app and your debug SHA-1 fingerprint.';
     }
     if (text.contains('SocketException') || text.contains('Failed host lookup')) {
-      return 'Cannot reach the backend. For local dev, start Spring Boot on port 8080. For production, the app uses https://flutternewsapp-5vkz.onrender.com.';
+      return 'Cannot reach the backend. Start Spring Boot on port 8080 and use an emulator (10.0.2.2) or set the correct API URL for a physical device.';
     }
     return 'Google sign-in failed: $text';
   }
